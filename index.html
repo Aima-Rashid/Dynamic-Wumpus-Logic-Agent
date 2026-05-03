@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wumpus Logic Agent — KB Inference Engine</title>
+  <meta name="description" content="Knowledge-Based Agent navigating a Wumpus World grid using Propositional Logic and Resolution Refutation." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ════════════════════════════════════════════════════
+       HEADER
+  ════════════════════════════════════════════════════ -->
+  <header class="header">
+    <div class="header-left"> 
+      <h1>Wumpus <span>Logic</span> Agent</h1>
+    </div>
+    <div class="header-badge">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-badge-text">IDLE</span>
+    </div>
+  </header>
+
+  <!-- ════════════════════════════════════════════════════
+       CONTROLS BAR
+  ════════════════════════════════════════════════════ -->
+  <div class="controls-bar">
+
+    <div class="ctrl-group">
+      <label for="inp-rows">Grid Rows</label>
+      <input type="number" id="inp-rows" min="3" max="9" value="4" />
+    </div>
+
+    <div class="ctrl-group">
+      <label for="inp-cols">Grid Cols</label>
+      <input type="number" id="inp-cols" min="3" max="9" value="4" />
+    </div>
+
+    <div class="ctrl-group">
+      <label for="inp-pits">Pit Count</label>
+      <input type="number" id="inp-pits" min="1" max="8" value="3" />
+    </div>
+
+    <div class="ctrl-divider"></div>
+
+    <button class="btn btn-primary" id="btn-new">
+      <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M2 8a6 6 0 1 0 12 0A6 6 0 0 0 2 8z"/>
+        <path d="M8 5v3l2 2"/>
+      </svg>
+      New Episode
+    </button>
+
+    <button class="btn btn-success" id="btn-step" disabled>
+      <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M5 3l6 5-6 5V3z" fill="currentColor" stroke="none"/>
+      </svg>
+      Step Agent
+    </button>
+
+    <button class="btn btn-success" id="btn-auto" disabled>
+      <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M3 3l4 5-4 5V3z" fill="currentColor" stroke="none"/>
+        <path d="M9 3l4 5-4 5V3z" fill="currentColor" stroke="none"/>
+      </svg>
+      Auto Run
+    </button>
+
+    <button class="btn btn-warning" id="btn-reveal" disabled>
+      <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <ellipse cx="8" cy="8" rx="6" ry="4"/>
+        <circle cx="8" cy="8" r="2" fill="currentColor" stroke="none"/>
+      </svg>
+      Reveal World
+    </button>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════════════
+       STATUS BANNER
+  ════════════════════════════════════════════════════ -->
+  <div class="status-banner state-idle" id="status-banner">
+    <span class="status-prefix">STATUS</span>
+    <span id="status-text">Configure grid parameters and press New Episode to initialise.</span>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════
+       MAIN CONTENT — GRID + SIDEBAR
+  ════════════════════════════════════════════════════ -->
+  <div class="content-layout">
+
+    <!-- ── Left: Grid ───────────────────────────────── -->
+    <div class="grid-area">
+
+      <div class="grid-wrapper">
+        <div class="grid-header">
+          <span class="grid-header-label">Environment Grid</span>
+          <span class="grid-coords" id="grid-coords">—</span>
+        </div>
+
+        <div id="grid-container">
+          <div class="grid-placeholder">
+            <span class="grid-placeholder-icon">🧭</span>
+            <span>No episode active</span>
+            <span style="font-size:10px;color:var(--text-faint);">Press "New Episode" to generate world</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /grid-area -->
+
+    <!-- ── Right: Sidebar ───────────────────────────── -->
+    <aside class="sidebar">
+
+      <!-- Percepts -->
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Active Percepts</span>
+          <span class="panel-badge" id="m-pos">—</span>
+        </div>
+        <div class="panel-body">
+          <div class="percept-row" id="percept-display">
+            <span class="percept-chip p-none">
+              <span class="percept-chip-dot"></span>none
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metrics -->
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Runtime Metrics</span>
+        </div>
+        <div class="panel-body">
+          <div class="metrics-grid">
+
+            <div class="metric-card">
+              <span class="metric-label">Steps</span>
+              <span class="metric-value cyan" id="m-steps">0</span>
+              <span class="metric-sub">agent moves</span>
+            </div>
+
+            <div class="metric-card">
+              <span class="metric-label">Visited</span>
+              <span class="metric-value" id="m-visited">0</span>
+              <span class="metric-sub">cells explored</span>
+            </div>
+
+            <div class="metric-card">
+              <span class="metric-label">Inferences</span>
+              <span class="metric-value amber" id="m-infer">0</span>
+              <span class="metric-sub">ASK calls</span>
+            </div>
+
+            <div class="metric-card">
+              <span class="metric-label">Resolutions</span>
+              <span class="metric-value amber" id="m-resol">0</span>
+              <span class="metric-sub">clause pairs</span>
+            </div>
+
+            <div class="metric-card">
+              <span class="metric-label">Safe Deduced</span>
+              <span class="metric-value green" id="m-safe">0</span>
+              <span class="metric-sub">via refutation</span>
+            </div>
+
+            <div class="metric-card">
+              <span class="metric-label">Hazards Found</span>
+              <span class="metric-value red" id="m-haz">0</span>
+              <span class="metric-sub">confirmed</span>
+            </div>
+
+            <div class="metric-card full">
+              <span class="metric-label">KB Clauses (CNF)</span>
+              <span class="metric-value purple" id="m-kb">0</span>
+              <span class="metric-sub">total clauses in knowledge base</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Cell Legend</span>
+        </div>
+        <div class="panel-body">
+          <div class="legend-list">
+            <div class="legend-item">
+              <div class="legend-swatch sw-agent"></div>
+              Agent position
+            </div>
+            <div class="legend-item">
+              <div class="legend-swatch sw-safe"></div>
+              Safe — proven by KB
+            </div>
+            <div class="legend-item">
+              <div class="legend-swatch sw-visited"></div>
+              Visited / explored
+            </div>
+            <div class="legend-item">
+              <div class="legend-swatch sw-suspect"></div>
+              Suspicious — unresolved
+            </div>
+            <div class="legend-item">
+              <div class="legend-swatch sw-pit"></div>
+              Pit — confirmed (🕳️)
+            </div>
+            <div class="legend-item">
+              <div class="legend-swatch sw-wumpus"></div>
+              Wumpus — confirmed (👾)
+            </div>
+            <div class="legend-item">
+              <div class="legend-swatch sw-unknown"></div>
+              Unknown / unexplored
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity Log -->
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Activity Log</span>
+          <span class="panel-badge" id="log-count">—</span>
+        </div>
+        <div class="panel-body" style="padding-top:8px;padding-bottom:8px;">
+          <div class="log-container" id="log"></div>
+        </div>
+      </div>
+
+      <!-- KB Clauses -->
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Knowledge Base — CNF</span>
+          <span class="panel-badge" id="kb-count">0</span>
+        </div>
+        <div class="panel-body" style="padding-top:8px;padding-bottom:8px;">
+          <div class="kb-container" id="kb-display"></div>
+        </div>
+      </div>
+
+    </aside><!-- /sidebar -->
+  </div><!-- /content-layout -->
+
+</div><!-- /#app -->
+
+<script src="script.js"></script>
+</body>
+</html>
