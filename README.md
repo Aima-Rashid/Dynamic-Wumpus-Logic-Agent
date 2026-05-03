@@ -1,4 +1,4 @@
-# Wumpus Logic Agent 🤖
+# Wumpus Logic Agent 
 
 A knowledge-based AI agent that navigates a Wumpus World using:
 - Propositional Logic
