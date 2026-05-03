@@ -1,23 +1,32 @@
-# Wumpus Logic Agent 
+# Dynamic Wumpus World Logic Agent
 
-A knowledge-based AI agent that navigates a Wumpus World using:
-- Propositional Logic
-- CNF Knowledge Base
-- Resolution Refutation
-- Safe cell inference
+A web-based AI agent that solves the Dynamic Wumpus World using **Propositional Logic**, **CNF conversion**, and **Resolution-based inference**.
+
+## Live Demo
+🔗 https://aima-rashid.github.io/Dynamic-Wumpus-Logic-Agent/
 
 ## Features
-- Dynamic grid world
-- Logical inference engine
-- Automatic safe-path discovery
-- Hazard detection (Pits & Wumpus)
-- Step-by-step or auto simulation
+- Dynamic Wumpus World environment
+- Knowledge Base construction
+- CNF Conversion
+- Resolution-based inference engine
+- Logical reasoning for safe movement
+
+## Core Concepts
+- Propositional Logic
+- Conjunctive Normal Form (CNF)
+- Resolution Algorithm
+- AI Agent Decision Making
 
 ## Tech Stack
-- HTML
-- CSS
-- JavaScript
+- HTML, CSS, JavaScript
+- Logic Parser + Resolution Engine (Custom Implementation)
 
-## How to run
-Just open `index.html` in browser or use GitHub Pages.
-
+## Challenges Faced
+- Designing a correct CNF converter
+- Implementing resolution efficiently
+- Handling dynamic updates in the knowledge base
+- Avoiding infinite resolution loops
+ 
+## Author
+Aima Rashid
