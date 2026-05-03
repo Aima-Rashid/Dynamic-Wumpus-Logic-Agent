@@ -21,5 +21,3 @@ A knowledge-based AI agent that navigates a Wumpus World using:
 ## How to run
 Just open `index.html` in browser or use GitHub Pages.
 
-## Author
-Student Project — AI & Logic Systems
